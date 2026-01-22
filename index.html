@@ -76,6 +76,21 @@
         margin:0;
         letter-spacing: .2px;
       }
+
+      /* ★追加：LIFF URLリンクの見た目 */
+      .liff-link{
+        display: inline-block;
+        margin-top: 4px;
+        font-size: 12px;
+        color: var(--accent2);
+        text-decoration: none;
+        opacity: .9;
+      }
+      .liff-link:hover{
+        text-decoration: underline;
+        opacity: 1;
+      }
+
       .badge{
         display:inline-flex;
         align-items:center;
@@ -221,25 +236,25 @@
   <body>
     <div class="wrap">
       <section class="hero">
-      <div class="title">
-        <div>
-          <h1>LIFF Sample</h1>
-          <a
-            href="https://liff.line.me/1657551101-OLp9pM2g"
-            target="_blank"
-            rel="noopener noreferrer"
-            class="liff-link"
-          >
-            LIFF URL を開く →
-          </a>
+        <div class="title">
+          <div>
+            <h1>LIFF Sample</h1>
+            <a
+              href="https://liff.line.me/1657551101-OLp9pM2g"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="liff-link"
+            >
+              LIFF URL を開く →
+            </a>
+          </div>
+
+          <div class="badge" id="badge">
+            <span class="dot" id="dot"></span>
+            <span id="statusText">Initializing…</span>
+          </div>
         </div>
-      
-        <div class="badge" id="badge">
-          <span class="dot" id="dot"></span>
-          <span id="statusText">Initializing…</span>
-        </div>
-      </div>
-        </div>
+
         <p class="sub">
           目的：<b>ログイン確認</b>／<b>プロフィール取得</b>／<b>FLEXメッセージ送信</b>（<code class="k">sendMessages → shareTargetPicker</code> フォールバック）
         </p>
@@ -334,10 +349,9 @@
       }
 
       function buildFlexMessage(text) {
-        // シンプルなBubble。まずは壊れにくい構造で固定。
         return {
           type: "flex",
-          altText: text, // 必須
+          altText: text,
           contents: {
             type: "bubble",
             size: "mega",
@@ -346,20 +360,8 @@
               layout: "vertical",
               spacing: "md",
               contents: [
-                {
-                  type: "text",
-                  text: "Random ping",
-                  size: "sm",
-                  color: "#A3A3A3"
-                },
-                {
-                  type: "text",
-                  text,
-                  size: "xl",
-                  weight: "bold",
-                  wrap: true,
-                  color: "#111827"
-                },
+                { type: "text", text: "Random ping", size: "sm", color: "#A3A3A3" },
+                { type: "text", text, size: "xl", weight: "bold", wrap: true, color: "#111827" },
                 {
                   type: "box",
                   layout: "baseline",
@@ -371,11 +373,7 @@
                 }
               ]
             },
-            styles: {
-              body: {
-                backgroundColor: "#FFFFFF"
-              }
-            }
+            styles: { body: { backgroundColor: "#FFFFFF" } }
           }
         };
       }
@@ -396,23 +394,14 @@
             elWarn.textContent = "";
           }
 
-          log({
-            liffId: LIFF_ID,
-            inClient,
-            loggedIn,
-            context
-          });
-        } catch (e) {
-          // init前に呼ばれた場合など
-        }
+          log({ liffId: LIFF_ID, inClient, loggedIn, context });
+        } catch (e) {}
       }
 
       async function trySendFlex() {
         const text = pickRandomMessage();
-        const flex = buildFlexMessage(text);
-        const messages = [flex];
+        const messages = [buildFlexMessage(text)];
 
-        // まずsendMessages（トーク起点なら強い）
         try {
           await liff.sendMessages(messages);
           log({ sentBy: "sendMessages", message: "FLEX sent", text });
@@ -426,7 +415,6 @@
           });
         }
 
-        // shareTargetPicker はログインが必要
         if (!liff.isLoggedIn()) {
           elWarn.textContent = "shareTargetPicker を使うため login が必要です。login します。";
           liff.login({ redirectUri: window.location.href });
@@ -445,10 +433,7 @@
         elLiffIdText.textContent = LIFF_ID;
 
         try {
-          await liff.init({
-            liffId: LIFF_ID,
-            // withLoginOnExternalBrowser: true,
-          });
+          await liff.init({ liffId: LIFF_ID });
 
           setStatus(true, "Ready");
           refreshKVs();
