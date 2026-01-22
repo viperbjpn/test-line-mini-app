@@ -16,8 +16,8 @@
         --text: rgba(255,255,255,.92);
         --muted: rgba(255,255,255,.68);
         --line: rgba(255,255,255,.12);
-        --accent: #22c55e; /* green */
-        --accent2: #60a5fa; /* blue */
+        --accent: #22c55e;
+        --accent2: #60a5fa;
         --danger: #ef4444;
         --shadow: 0 10px 30px rgba(0,0,0,.35);
         --radius: 16px;
@@ -47,12 +47,7 @@
         padding: 20px;
       }
 
-      .wrap{
-        max-width: 920px;
-        margin: 0 auto;
-        display: grid;
-        gap: 16px;
-      }
+      .wrap{ max-width: 920px; margin: 0 auto; display: grid; gap: 16px; }
 
       .hero{
         padding: 18px 18px 14px;
@@ -70,14 +65,8 @@
         gap: 12px;
         margin-bottom: 10px;
       }
-      h1{
-        font-size: 20px;
-        line-height: 1.2;
-        margin:0;
-        letter-spacing: .2px;
-      }
+      h1{ font-size: 20px; line-height: 1.2; margin:0; letter-spacing: .2px; }
 
-      /* ★追加：LIFF URLリンクの見た目 */
       .liff-link{
         display: inline-block;
         margin-top: 4px;
@@ -86,10 +75,7 @@
         text-decoration: none;
         opacity: .9;
       }
-      .liff-link:hover{
-        text-decoration: underline;
-        opacity: 1;
-      }
+      .liff-link:hover{ text-decoration: underline; opacity: 1; }
 
       .badge{
         display:inline-flex;
@@ -112,21 +98,14 @@
       .dot.ok{ background: var(--accent); }
       .dot.ng{ background: var(--danger); }
 
-      .sub{
-        margin: 0;
-        color: var(--muted);
-        font-size: 13px;
-        line-height: 1.5;
-      }
+      .sub{ margin: 0; color: var(--muted); font-size: 13px; line-height: 1.5; }
 
       .grid{
         display:grid;
         grid-template-columns: 1.2fr .8fr;
         gap: 16px;
       }
-      @media (max-width: 860px){
-        .grid{ grid-template-columns: 1fr; }
-      }
+      @media (max-width: 860px){ .grid{ grid-template-columns: 1fr; } }
 
       .card{
         border: 1px solid var(--line);
@@ -144,30 +123,18 @@
         justify-content: space-between;
         gap: 10px;
       }
-      .card-h .h{
-        font-size: 14px;
-        margin:0;
-        color: var(--text);
-        letter-spacing: .2px;
-      }
-      .card-b{
-        padding: 14px 16px 16px;
-      }
+      .card-h .h{ font-size: 14px; margin:0; color: var(--text); letter-spacing: .2px; }
+      .card-b{ padding: 14px 16px 16px; }
 
       .warn{
         margin: 8px 0 0;
         color: #ffb4b4;
         font-size: 12px;
       }
-      @media (prefers-color-scheme: light){
-        .warn{ color:#b00020; }
-      }
+      @media (prefers-color-scheme: light){ .warn{ color:#b00020; } }
 
-      .btns{
-        display:flex;
-        flex-wrap: wrap;
-        gap: 10px;
-      }
+      .btns{ display:flex; flex-wrap: wrap; gap: 10px; }
+
       button{
         appearance: none;
         border: 1px solid var(--line);
@@ -177,23 +144,32 @@
         border-radius: 12px;
         font-size: 13px;
         cursor: pointer;
-        transition: transform .06s ease, background .2s ease, border-color .2s ease;
+        transition: transform .06s ease, background .2s ease, border-color .2s ease, opacity .2s ease;
       }
       button:hover{ background: rgba(255,255,255,.10); }
       button:active{ transform: translateY(1px); }
+
       button.primary{
         border-color: rgba(34,197,94,.55);
         background: rgba(34,197,94,.15);
       }
       button.primary:hover{ background: rgba(34,197,94,.22); }
+
       button.info{
         border-color: rgba(96,165,250,.55);
         background: rgba(96,165,250,.15);
       }
       button.info:hover{ background: rgba(96,165,250,.22); }
-      button.ghost{
-        background: transparent;
+
+      button.ghost{ background: transparent; }
+
+      /* ★追加：無効時を「分かりやすく」 */
+      button:disabled{
+        opacity: .45;
+        cursor: not-allowed;
+        transform: none;
       }
+      button:disabled:hover{ background: rgba(255,255,255,.06); }
 
       .kv{
         display:grid;
@@ -217,18 +193,10 @@
         line-height: 1.5;
       }
       @media (prefers-color-scheme: light){
-        pre{
-          background: rgba(0,0,0,.04);
-          color: rgba(0,0,0,.80);
-        }
+        pre{ background: rgba(0,0,0,.04); color: rgba(0,0,0,.80); }
       }
 
-      .tiny{
-        font-size: 12px;
-        color: var(--muted);
-        margin-top: 10px;
-        line-height: 1.5;
-      }
+      .tiny{ font-size: 12px; color: var(--muted); margin-top: 10px; line-height: 1.5; }
       code.k{ font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace; }
     </style>
   </head>
@@ -256,7 +224,7 @@
         </div>
 
         <p class="sub">
-          目的：<b>ログイン確認</b>／<b>プロフィール取得</b>／<b>FLEXメッセージ送信</b>（<code class="k">sendMessages → shareTargetPicker</code> フォールバック）
+          目的：<b>ログイン状態の可視化</b>／<b>プロフィール取得</b>／<b>FLEX送信</b>（<code class="k">sendMessages → shareTargetPicker</code>）
         </p>
         <p class="warn" id="warn"></p>
       </section>
@@ -278,7 +246,7 @@
               <button class="primary" id="btnRandomFlex">ランダム一言をFLEXで送る</button>
             </div>
             <p class="tiny">
-              <b>sendMessages</b> は「トーク起点 + 権限（スコープ）」が必要な場合があり、ダメなら自動で <b>shareTargetPicker</b> に切り替えます。
+              押せるボタンだけ有効化されます。ログイン済みなら <b>login</b> は無効化、未ログインなら <b>プロフィール/送信/ログアウト</b> は無効化。
             </p>
           </div>
           <pre id="out">{}</pre>
@@ -296,7 +264,7 @@
               <dt>context</dt><dd id="kvContext">-</dd>
             </dl>
             <p class="tiny">
-              送信がうまくいかないときは、<b>LINEアプリ内</b>で起動しているか（inClient）と、<b>ログイン状態</b>（loggedIn）をまず確認。
+              loggedIn=true になれば「プロフィール表示」「FLEX送信」が有効になります。
             </p>
           </div>
         </div>
@@ -304,10 +272,8 @@
     </div>
 
     <script>
-      // あなたの LIFF ID
       const LIFF_ID = "1657551101-OLp9pM2g";
 
-      // ランダム文言（10個）
       const RANDOM_MESSAGES = [
         "やほー！元気ー？",
         "今ひまー？",
@@ -323,14 +289,18 @@
 
       const elWarn = document.getElementById("warn");
       const elOut = document.getElementById("out");
-
       const elDot = document.getElementById("dot");
       const elStatusText = document.getElementById("statusText");
-
       const elKvInClient = document.getElementById("kvInClient");
       const elKvLoggedIn = document.getElementById("kvLoggedIn");
       const elKvContext = document.getElementById("kvContext");
       const elLiffIdText = document.getElementById("liffIdText");
+
+      const btnLogin = document.getElementById("btnLogin");
+      const btnProfile = document.getElementById("btnProfile");
+      const btnLogout = document.getElementById("btnLogout");
+      const btnRandomFlex = document.getElementById("btnRandomFlex");
+      const btnRefresh = document.getElementById("btnRefresh");
 
       function log(obj) {
         elOut.textContent = typeof obj === "string" ? obj : JSON.stringify(obj, null, 2);
@@ -378,30 +348,43 @@
         };
       }
 
-      function refreshKVs() {
+      function refreshUI() {
         try {
           const inClient = liff.isInClient();
           const loggedIn = liff.isLoggedIn();
           const context = liff.getContext ? liff.getContext() : null;
 
+          // 状態表示
           elKvInClient.textContent = String(inClient);
           elKvLoggedIn.textContent = String(loggedIn);
           elKvContext.textContent = context ? JSON.stringify(context) : "-";
 
-          if (!loggedIn) {
-            elWarn.textContent = "未ログインです。外部ブラウザで開いている場合は login を押してください。";
-          } else {
-            elWarn.textContent = "";
-          }
+          // ボタン状態（重要）
+          btnLogin.disabled = loggedIn;           // ログイン済みなら押せない
+          btnLogout.disabled = !loggedIn;         // 未ログインなら押せない
+          btnProfile.disabled = !loggedIn;        // 未ログインなら押せない
+          btnRandomFlex.disabled = !loggedIn;     // 未ログインなら押せない
 
+          // ボタン文言切り替え
+          btnProfile.textContent = loggedIn ? "プロフィール表示" : "getProfile";
+
+          // メッセージ
+          elWarn.textContent = loggedIn
+            ? ""
+            : "未ログインです。login を押してからプロフィール表示・FLEX送信が使えます。";
+
+          // ログ
           log({ liffId: LIFF_ID, inClient, loggedIn, context });
-        } catch (e) {}
+        } catch (e) {
+          // init前など
+        }
       }
 
       async function trySendFlex() {
         const text = pickRandomMessage();
         const messages = [buildFlexMessage(text)];
 
+        // sendMessages -> 失敗したら shareTargetPicker
         try {
           await liff.sendMessages(messages);
           log({ sentBy: "sendMessages", message: "FLEX sent", text });
@@ -413,12 +396,6 @@
             sendMessagesError: err?.message || String(err),
             text
           });
-        }
-
-        if (!liff.isLoggedIn()) {
-          elWarn.textContent = "shareTargetPicker を使うため login が必要です。login します。";
-          liff.login({ redirectUri: window.location.href });
-          return;
         }
 
         try {
@@ -436,20 +413,17 @@
           await liff.init({ liffId: LIFF_ID });
 
           setStatus(true, "Ready");
-          refreshKVs();
+          refreshUI();
 
-          document.getElementById("btnRefresh").addEventListener("click", refreshKVs);
+          // ボタンイベント
+          btnRefresh.addEventListener("click", refreshUI);
 
-          document.getElementById("btnLogin").addEventListener("click", () => {
+          btnLogin.addEventListener("click", () => {
             if (!liff.isLoggedIn()) liff.login({ redirectUri: window.location.href });
           });
 
-          document.getElementById("btnProfile").addEventListener("click", async () => {
+          btnProfile.addEventListener("click", async () => {
             try {
-              if (!liff.isLoggedIn()) {
-                elWarn.textContent = "先に login が必要です。";
-                return;
-              }
               const profile = await liff.getProfile();
               log(profile);
             } catch (e) {
@@ -457,12 +431,12 @@
             }
           });
 
-          document.getElementById("btnLogout").addEventListener("click", () => {
+          btnLogout.addEventListener("click", () => {
             if (liff.isLoggedIn()) liff.logout();
             window.location.reload();
           });
 
-          document.getElementById("btnRandomFlex").addEventListener("click", async () => {
+          btnRandomFlex.addEventListener("click", async () => {
             elWarn.textContent = "";
             await trySendFlex();
           });
