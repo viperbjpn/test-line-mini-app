@@ -306,21 +306,30 @@
       }
 
       // ★ここが改修ポイント：Readyに Logged in/out を合成表示
-      function setStatus(ok, text) {
-        const loggedIn =
-          (typeof liff !== "undefined" && liff.isLoggedIn) ? liff.isLoggedIn() : null;
+function setStatus(ok, text) {
+  let loggedIn = null;
 
-        const authLabel =
-          loggedIn === true ? "Logged in" :
-          loggedIn === false ? "Logged out" :
-          "Auth unknown";
+  // init前に isLoggedIn() を呼ぶと例外になることがあるのでガード
+  try {
+    if (typeof liff !== "undefined" && typeof liff.isLoggedIn === "function") {
+      loggedIn = liff.isLoggedIn();
+    }
+  } catch (_) {
+    loggedIn = null;
+  }
 
-        elStatusText.textContent = `${text} · ${authLabel}`;
+  const authLabel =
+    loggedIn === true ? "Logged in" :
+    loggedIn === false ? "Logged out" :
+    "Auth unknown";
 
-        elDot.classList.remove("ok", "ng");
-        if (ok === true) elDot.classList.add("ok");
-        if (ok === false) elDot.classList.add("ng");
-      }
+  elStatusText.textContent = `${text} · ${authLabel}`;
+
+  elDot.classList.remove("ok", "ng");
+  if (ok === true) elDot.classList.add("ok");
+  if (ok === false) elDot.classList.add("ng");
+}
+
 
       function pickRandomMessage() {
         const i = Math.floor(Math.random() * RANDOM_MESSAGES.length);
