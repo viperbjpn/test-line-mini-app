@@ -11,7 +11,7 @@
     <style>
       body { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; padding: 16px; }
       pre { background: #f6f6f6; padding: 12px; border-radius: 8px; overflow: auto; }
-      button { padding: 10px 12px; margin-right: 8px; }
+      button { padding: 10px 12px; margin-right: 8px; margin-bottom: 8px; }
       .warn { color: #b00020; }
     </style>
   </head>
@@ -25,13 +25,28 @@
       <button id="btnLogin">login</button>
       <button id="btnProfile">getProfile</button>
       <button id="btnLogout">logout</button>
+      <button id="btnRandom">ランダム一言を送る</button>
     </p>
 
     <pre id="out"></pre>
 
     <script>
-      // あなたの LIFF ID（miniapp.line.me の末尾）
+      // あなたの LIFF ID（miniapp.line.me / liff.line.me の末尾）
       const LIFF_ID = "1657551101-OLp9pM2g";
+
+      // ランダム文言（10個）
+      const RANDOM_MESSAGES = [
+        "やほー！元気ー？",
+        "今ひまー？",
+        "なにしてるのー？",
+        "ちょっとだけ話さない？",
+        "おつかれさまー",
+        "今日どうだった？",
+        "なんとなく連絡してみた",
+        "暇つぶしに送ってみた笑",
+        "元気そうでなにより！",
+        "今ちょっと思い出した！"
+      ];
 
       const elStatus = document.getElementById("status");
       const elWarn = document.getElementById("warn");
@@ -39,6 +54,47 @@
 
       function log(obj) {
         elOut.textContent = typeof obj === "string" ? obj : JSON.stringify(obj, null, 2);
+      }
+
+      function pickRandomMessage() {
+        const i = Math.floor(Math.random() * RANDOM_MESSAGES.length);
+        return RANDOM_MESSAGES[i];
+      }
+
+      async function trySendRandom() {
+        const text = pickRandomMessage();
+        const messages = [{ type: "text", text }];
+
+        // 1) まずは「今開いているトークへ送信」を試す（トーク起点 + スコープ要）
+        try {
+          await liff.sendMessages(messages);
+          log({ sentBy: "sendMessages", text });
+          // 送れたら閉じる（不要ならコメントアウト）
+          liff.closeWindow();
+          return;
+        } catch (err) {
+          // sendMessages がダメな環境（外部ブラウザ/トーク起点でない等）ではここに来る
+          // 次に shareTargetPicker にフォールバック
+          log({
+            note: "sendMessages 失敗 → shareTargetPicker にフォールバックします",
+            sendMessagesError: err?.message || String(err),
+            text
+          });
+        }
+
+        // 2) shareTargetPicker はログインが必要
+        if (!liff.isLoggedIn()) {
+          elWarn.textContent = "shareTargetPicker を使うため login が必要です。login します。";
+          liff.login({ redirectUri: window.location.href });
+          return;
+        }
+
+        try {
+          await liff.shareTargetPicker(messages, { isMultiple: true });
+          log({ sentBy: "shareTargetPicker", text });
+        } catch (err) {
+          log({ error: err?.message || String(err), where: "shareTargetPicker" });
+        }
       }
 
       async function main() {
@@ -66,6 +122,8 @@
           if (!liff.isLoggedIn()) {
             elWarn.textContent =
               "未ログインです。外部ブラウザで開いている場合は login ボタンを押してください。";
+          } else {
+            elWarn.textContent = "";
           }
 
           // 3) ボタン
@@ -90,15 +148,23 @@
             if (liff.isLoggedIn()) liff.logout();
             window.location.reload();
           });
+
+          document.getElementById("btnRandom").addEventListener("click", async () => {
+            elWarn.textContent = "";
+            await trySendRandom();
+          });
+
         } catch (err) {
           elStatus.textContent = "LIFF init failed";
           log({
-            error: String(err),
+            error: err?.message || String(err),
+            raw: err,
             checklist: [
               "LINE DevelopersのLIFF設定で Endpoint URL がこのページのURLと一致しているか",
               "HTTPSで配信しているか",
               "LIFF ID が正しいか",
               "外部ブラウザ/LIFFブラウザの想定が合っているか",
+              "テスト対象者（権限）に起動ユーザーが含まれているか",
             ],
           });
         }
