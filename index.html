@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>LIFF Sample</title>
+
+    <!-- LIFF SDK（固定版） -->
+    <script src="https://static.line-scdn.net/liff/edge/versions/2.22.3/sdk.js"></script>
+
+    <style>
+      body { font-family: system-ui, -apple-system, "Segoe UI", sans-serif; padding: 16px; }
+      pre { background: #f6f6f6; padding: 12px; border-radius: 8px; overflow: auto; }
+      button { padding: 10px 12px; margin-right: 8px; }
+      .warn { color: #b00020; }
+    </style>
+  </head>
+
+  <body>
+    <h1>LIFF Sample</h1>
+    <div id="status">Initializing…</div>
+    <p class="warn" id="warn"></p>
+
+    <p>
+      <button id="btnLogin">login</button>
+      <button id="btnProfile">getProfile</button>
+      <button id="btnLogout">logout</button>
+    </p>
+
+    <pre id="out"></pre>
+
+    <script>
+      // あなたの LIFF ID（miniapp.line.me の末尾）
+      const LIFF_ID = "1657551101-OLp9pM2g";
+
+      const elStatus = document.getElementById("status");
+      const elWarn = document.getElementById("warn");
+      const elOut = document.getElementById("out");
+
+      function log(obj) {
+        elOut.textContent = typeof obj === "string" ? obj : JSON.stringify(obj, null, 2);
+      }
+
+      async function main() {
+        try {
+          // 1) 初期化：LINEに「このWebはこのLIFF IDのアプリです」と接続
+          await liff.init({
+            liffId: LIFF_ID,
+            // 外部ブラウザで開かれることが多い導線なら true も検討
+            // withLoginOnExternalBrowser: true,
+          });
+
+          elStatus.textContent =
+            `Ready. inClient=${liff.isInClient()} loggedIn=${liff.isLoggedIn()}`;
+
+          // 2) 参考情報を表示
+          const context = liff.getContext ? liff.getContext() : null;
+          log({
+            liffId: LIFF_ID,
+            inClient: liff.isInClient(),
+            isLoggedIn: liff.isLoggedIn(),
+            context,
+          });
+
+          // 外部ブラウザで未ログインなら注意表示
+          if (!liff.isLoggedIn()) {
+            elWarn.textContent =
+              "未ログインです。外部ブラウザで開いている場合は login ボタンを押してください。";
+          }
+
+          // 3) ボタン
+          document.getElementById("btnLogin").addEventListener("click", () => {
+            if (!liff.isLoggedIn()) liff.login({ redirectUri: window.location.href });
+          });
+
+          document.getElementById("btnProfile").addEventListener("click", async () => {
+            try {
+              if (!liff.isLoggedIn()) {
+                elWarn.textContent = "先に login が必要です。";
+                return;
+              }
+              const profile = await liff.getProfile();
+              log(profile);
+            } catch (e) {
+              log({ error: String(e) });
+            }
+          });
+
+          document.getElementById("btnLogout").addEventListener("click", () => {
+            if (liff.isLoggedIn()) liff.logout();
+            window.location.reload();
+          });
+        } catch (err) {
+          elStatus.textContent = "LIFF init failed";
+          log({
+            error: String(err),
+            checklist: [
+              "LINE DevelopersのLIFF設定で Endpoint URL がこのページのURLと一致しているか",
+              "HTTPSで配信しているか",
+              "LIFF ID が正しいか",
+              "外部ブラウザ/LIFFブラウザの想定が合っているか",
+            ],
+          });
+        }
+      }
+
+      main();
+    </script>
+  </body>
+</html>
