@@ -163,7 +163,6 @@
 
       button.ghost{ background: transparent; }
 
-      /* ★追加：無効時を「分かりやすく」 */
       button:disabled{
         opacity: .45;
         cursor: not-allowed;
@@ -306,8 +305,18 @@
         elOut.textContent = typeof obj === "string" ? obj : JSON.stringify(obj, null, 2);
       }
 
+      // ★ここが改修ポイント：Readyに Logged in/out を合成表示
       function setStatus(ok, text) {
-        elStatusText.textContent = text;
+        const loggedIn =
+          (typeof liff !== "undefined" && liff.isLoggedIn) ? liff.isLoggedIn() : null;
+
+        const authLabel =
+          loggedIn === true ? "Logged in" :
+          loggedIn === false ? "Logged out" :
+          "Auth unknown";
+
+        elStatusText.textContent = `${text} · ${authLabel}`;
+
         elDot.classList.remove("ok", "ng");
         if (ok === true) elDot.classList.add("ok");
         if (ok === false) elDot.classList.add("ng");
@@ -354,26 +363,24 @@
           const loggedIn = liff.isLoggedIn();
           const context = liff.getContext ? liff.getContext() : null;
 
-          // 状態表示
           elKvInClient.textContent = String(inClient);
           elKvLoggedIn.textContent = String(loggedIn);
           elKvContext.textContent = context ? JSON.stringify(context) : "-";
 
-          // ボタン状態（重要）
-          btnLogin.disabled = loggedIn;           // ログイン済みなら押せない
-          btnLogout.disabled = !loggedIn;         // 未ログインなら押せない
-          btnProfile.disabled = !loggedIn;        // 未ログインなら押せない
-          btnRandomFlex.disabled = !loggedIn;     // 未ログインなら押せない
+          btnLogin.disabled = loggedIn;
+          btnLogout.disabled = !loggedIn;
+          btnProfile.disabled = !loggedIn;
+          btnRandomFlex.disabled = !loggedIn;
 
-          // ボタン文言切り替え
           btnProfile.textContent = loggedIn ? "プロフィール表示" : "getProfile";
 
-          // メッセージ
           elWarn.textContent = loggedIn
             ? ""
             : "未ログインです。login を押してからプロフィール表示・FLEX送信が使えます。";
 
-          // ログ
+          // ★ここが改修ポイント：UI更新時にステータスも更新
+          setStatus(true, "Ready");
+
           log({ liffId: LIFF_ID, inClient, loggedIn, context });
         } catch (e) {
           // init前など
@@ -384,7 +391,6 @@
         const text = pickRandomMessage();
         const messages = [buildFlexMessage(text)];
 
-        // sendMessages -> 失敗したら shareTargetPicker
         try {
           await liff.sendMessages(messages);
           log({ sentBy: "sendMessages", message: "FLEX sent", text });
@@ -410,12 +416,14 @@
         elLiffIdText.textContent = LIFF_ID;
 
         try {
+          // init前でも「Auth unknown」で表示される
+          setStatus(null, "Initializing");
+
           await liff.init({ liffId: LIFF_ID });
 
-          setStatus(true, "Ready");
+          // init後は refreshUI が「Ready · Logged in/out」まで面倒みる
           refreshUI();
 
-          // ボタンイベント
           btnRefresh.addEventListener("click", refreshUI);
 
           btnLogin.addEventListener("click", () => {
